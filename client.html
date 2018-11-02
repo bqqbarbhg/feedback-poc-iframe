@@ -1,0 +1,65 @@
+<html>
+
+<head>
+<meta charset="UTF-8">
+</head>
+
+<body>
+
+<h2>This is the client!</h2>
+
+<h4>Some elements:</h4>
+<ul>
+  <li>Item A</li>
+  <li>Item B</li>
+  <li>Item C</li>
+</ul>
+
+
+
+<script>
+
+// This is either copy-pasted into the client source
+// Google Analytics style, or included with <script src="">
+// Idea anyway is that this is completely vanilla JS and very
+// lightweight so we don't incur any overhead unless the feedback tool
+// is actually connected to this app.
+
+(function() {
+
+  // Optimization: If we're not running embedded no need to
+  // even try to listen for initialization events.
+  if (!window.parent) return
+
+  const handler = (e) => {
+    // Real-use: Check e.origin for secuirty
+
+    const msg = e.data
+    if (typeof msg !== 'object') return
+    if (msg.type !== 'init') return
+    if (msg.signature !== 'app-unique-identifier') return
+
+    window.removeEventListener('message', handler)
+
+    e.source.postMessage({
+      type: 'startedLoading',
+    }, '*')
+
+    const script = document.createElement('script')
+    // Real-use: This should be under the feedbacker domain
+    script.src = 'integration.js'
+    script.async = true
+    document.querySelector('head').appendChild(script)
+  }
+
+  // Install a temporary message handler, if we receive an
+  // initialization event load the real integration script.
+  window.addEventListener('message', handler)
+
+})()
+
+</script>
+
+</body>
+
+</html>
